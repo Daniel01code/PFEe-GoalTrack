@@ -16,11 +16,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class DgController extends Controller
 {
     //methode du dashbord du dg
+
+    //dashbord
     public function dashboard()
     {
         // Période en cours
         $periodeEnCours = Periode::where('statut', 'en_cours')->latest()->first();
-
+        // dd($periodeEnCours);
         // Stats globales
         $totalServices = Service::count();
         $totalEmployes = User::where('role', 'employe')->count();
@@ -44,30 +46,61 @@ class DgController extends Controller
             'tauxAtteinte'
         ));
     }
+    // vue creer une periode
     public function createPeriod()
     {
         $periodeEnCours = Periode::where('statut', 'en_cours')->first();
 
         return view('dg.periods.create', compact('periodeEnCours'));
     }
+    // vue editer la periode en cour
+    public function editPeriode()
+    {
+        $periodeEnCours = Periode::where('statut', 'en_cours')->first();
+        return view('dg.periods.update', compact('periodeEnCours'));
+    }
+     // editer la periode en cour
+    public function updatePeriode(Request $request, Periode $periode)
+    {
+        $request->validate([
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+        ]);
+
+        $periode->update([
+            'date_debut' => Carbon::parse($request->date_debut),
+            'date_fin' => Carbon::parse($request->date_fin),
+            'libelle' => 'Semaine ' . Carbon::parse($request->date_debut)->weekOfYear . ' - ' . Carbon::parse($request->date_debut)->year,
+        ]);
+
+        return redirect()->route('dg.dashboard')->with('success', 'Période mise à jour avec succès !');
+    }
 
     public function storePeriod(Request $request)
     {
+        $request->validate([
+            'date_debut' => 'required|date',
+            'date_fin'   => 'required|date|after:date_debut',
+        ]);
+
         // Clôturer l'ancienne période si elle existe
         Periode::where('statut', 'en_cours')->update(['statut' => 'cloturee']);
 
-        $start = Carbon::now()->startOfWeek(); // Lundi
-        $end = Carbon::now()->endOfWeek();     // Dimanche
+        $start = Carbon::parse($request->date_debut);
+        $end   = Carbon::parse($request->date_fin);
 
         Periode::create([
-            'libelle' => 'Semaine ' . $start->weekOfYear . ' - ' . $start->year,
-            'date_debut' => $start,
-            'date_fin' => $end,
-            'statut' => 'en_cours',
+            'libelle'     => 'Période du ' . $start->format('d/m/Y') . ' au ' . $end->format('d/m/Y'),
+            'date_debut'  => $start,
+            'date_fin'    => $end,
+            'statut'      => 'en_cours',
         ]);
 
-        return redirect()->route('dg.dashboard')->with('success', 'Nouvelle période démarrée avec succès !');
+        return redirect()
+            ->route('dg.dashboard')
+            ->with('success', 'Nouvelle période créée avec succès !');
     }
+
 
 
 

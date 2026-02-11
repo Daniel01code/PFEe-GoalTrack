@@ -21,7 +21,6 @@ class Rapport extends Model
         'contenu' => 'array',
         'date_soumission' => 'datetime',
     ];
-
 // Relation : rapport appartient à un employé
     public function user()
     {
