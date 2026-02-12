@@ -13,7 +13,7 @@ if (!function_exists('redirectByRole')) {
             'dg'      => route('dg.dashboard'),
             'chef'    => route('chef.dashboard'),
             'employe' => route('employee.dashboard'),
-            // default   => route('home'), // ou '/' ou route('login')
+            default => route('login'), // ou '/' ou route('login')
         };
     }
 }

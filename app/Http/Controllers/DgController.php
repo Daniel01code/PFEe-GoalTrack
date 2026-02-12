@@ -75,7 +75,7 @@ class DgController extends Controller
 
         return redirect()->route('dg.dashboard')->with('success', 'Période mise à jour avec succès !');
     }
-
+    // creer une periode 
     public function storePeriod(Request $request)
     {
         $request->validate([
@@ -101,26 +101,30 @@ class DgController extends Controller
             ->with('success', 'Nouvelle période créée avec succès !');
     }
 
-
-
-
-    //createGlobalGoal
+    // vue createGlobalGoal
     public function createGlobalGoal()
     {
-        $periodeEnCours = Periode::where('statut', 'en_cours')->first();
-
-        if (!$periodeEnCours) {
-            return redirect()->route('dg.dashboard')->with('error', 'Aucune période en cours. Démarrez une période d\'abord.');
-        }
-
+              $periodeEnCours = Periode::where('statut', 'en_cours')->firstOrFail();
         $services = Service::all();
 
-        return view('dg.global-goals.create', compact('periodeEnCours', 'services'));
-    }
+        // On récupère les objectifs déjà définis pour la période
+        $objectifsGlobaux = ObjectifGlobal::where('periode_id', $periodeEnCours->id)
+            ->pluck('description', 'service_id'); // On pourrait aussi pluck cibles et unite
 
+        $objectifs = [];
+        foreach ($services as $service) {
+            $objectif = ObjectifGlobal::where('periode_id', $periodeEnCours->id)
+                ->where('service_id', $service->id)
+                ->first();
+            $objectifs[$service->id] = $objectif;
+        }
+
+        return view('dg.global-goals.create', compact('periodeEnCours', 'services', 'objectifs'));
+    }
+    // traitement des objectif globaux
     public function storeGlobalGoal(Request $request)
     {
-        $periodeEnCours = Periode::where('statut', 'en_cours')->firstOrFail();
+         $periodeEnCours = Periode::where('statut', 'en_cours')->firstOrFail();
 
         $request->validate([
             'objectifs.*.description' => 'required|string|max:255',
@@ -130,16 +134,20 @@ class DgController extends Controller
         ]);
 
         foreach ($request->objectifs as $data) {
-            ObjectifGlobal::create([
-                'periode_id' => $periodeEnCours->id,
-                'service_id' => $data['service_id'],
-                'description' => $data['description'],
-                'cible' => $data['cible'],
-                'unite' => $data['unite'],
-            ]);
+            ObjectifGlobal::updateOrCreate(
+                [
+                    'periode_id' => $periodeEnCours->id,
+                    'service_id' => $data['service_id'],
+                ],
+                [
+                    'description' => $data['description'],
+                    'cible' => $data['cible'],
+                    'unite' => $data['unite'],
+                ]
+            );
         }
 
-        return redirect()->route('dg.dashboard')->with('success', 'Objectifs stratégiques publiés avec succès !');
+        return redirect()->route('dg.dashboard')->with('success', 'Objectifs stratégiques mis à jour avec succès !');
     }
 
     public function reportsIndex()

@@ -131,7 +131,7 @@
                     <p class="text-gray-600">Publier les objectifs globaux</p>
                 </a>
 
-                <a href="{{ route('services.index') }}" class="group bg-white rounded-3xl shadow-2xl p-10 hover:shadow-3xl transition transform hover:-translate-y-3 duration-300 text-center">
+                <a href="{{ route('dg.services.index') }}" class="group bg-white rounded-3xl shadow-2xl p-10 hover:shadow-3xl transition transform hover:-translate-y-3 duration-300 text-center">
                     <div class="bg-green-100 rounded-3xl p-8 mb-6 inline-flex">
                         <svg class="h-20 w-20 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>

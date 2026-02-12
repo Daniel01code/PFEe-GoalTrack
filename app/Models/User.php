@@ -24,6 +24,7 @@ class User extends Authenticatable
         'role', 
         'service_id', 
         'chef_id',
+        'is_deleted',
     ];
 
     /**

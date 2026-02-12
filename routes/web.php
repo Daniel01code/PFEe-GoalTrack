@@ -1,14 +1,16 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DgController;
 use App\Http\Controllers\ChefController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\EmployeeManagementController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,9 +30,9 @@ Route::middleware(['auth', 'role.dg','verified'])->group(function () {
     Route::post('/periods/store', [DgController::class, 'storePeriod'])->name('periods.store');
 
     Route::get('/global-goals/create', [DgController::class, 'createGlobalGoal'])->name('global-goals.create');
-    Route::post('/global-goals/store', [DgController::class, 'storeGlobalGoal'])->name('global-goals.store');
+    Route::patch('/global-goals/store', [DgController::class, 'storeGlobalGoal'])->name('global-goals.store');
 
-    Route::get('/services/index', [DgController::class, 'indexServices'])->name('services.index');
+    // Route::get('/services/index', [DgController::class, 'indexServices'])->name('services.index');
 
     Route::get('/reports/generate-pdf', [DgController::class, 'generatePdf'])->name('reports.generate-pdf');
 
@@ -53,7 +55,31 @@ Route::middleware(['auth', 'role.dg','verified'])->group(function () {
     // Modifier la période en cours
     Route::patch('/periods/edit/{periode}', [DgController::class, 'updatePeriode'])->name('dg.updatePeriode');
     Route::get('/periods/edit', [DgController::class, 'editPeriode'])->name('dg.editPeriode');
+    // Gestion des services (CRUD)
 
+    Route::resource('dg/management/services', ServiceController::class)->names([
+        'index'   => 'dg.services.index',
+        'create'  => 'dg.services.create',
+        'store'   => 'dg.services.store',
+        'show'    => 'dg.services.show',
+        'edit'    => 'dg.services.edit',
+        'update'  => 'dg.services.update',
+        'destroy' => 'dg.services.destroy',
+    ]);
+
+    // Gestion des services (CRUD complet)
+    Route::resource('dg/management/employees', EmployeeManagementController::class)->names([
+        'index'   => 'dg.employees.index',
+        'create'  => 'dg.employees.create',
+        'store'   => 'dg.employees.store',
+        'show'    => 'dg.employees.show',
+        'edit'    => 'dg.employees.edit',
+        'update'  => 'dg.employees.update',
+        'destroy' => 'dg.employees.destroy',
+    ]);
+    // Mise à jour partielle d'un employé (PATCH)
+    Route::patch('dg/management/employees/{employee}', [EmployeeManagementController::class, 'partialUpdate'])->name('dg.employees.partialUpdate');
+    
 });
 
 
